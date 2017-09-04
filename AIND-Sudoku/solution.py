@@ -13,9 +13,11 @@ row_units = [cross(r, cols) for r in rows]
 col_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
 
-diagonal_units = [['A1','B2', 'C3', 'D4', 'E5', 'F6', 'G7', 'H8', 'I9'],
-                  ['A9','B8', 'C7', 'D6', 'E5', 'F4', 'G3', 'H2', 'I1']]
+diagonal_units = [[rows[i]+cols[i] for i in range(0,len(rows))]] + \
+                 [[rows[i]+cols[-i-1] for i in range(0, len(rows))]]
 
+#diagonal_units = [['A1','B2', 'C3', 'D4', 'E5', 'F6', 'G7', 'H8', 'I9'],
+#                  ['A9','B8', 'C7', 'D6', 'E5', 'F4', 'G3', 'H2', 'I1']]
 
 unitlist = row_units + col_units + square_units + diagonal_units
 
@@ -172,20 +174,20 @@ def solve(grid):
     return values
 
 if __name__ == '__main__':
-    #diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
-    #display(solve(diag_sudoku_grid))
+    diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
+    display(solve(diag_sudoku_grid))
     
     #print('\n')
 
-    last_test = '4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......'
-    solve(last_test)
+    #last_test = '4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......'
+    #solve(last_test)
 
 
-    try:
+    """try:
         from visualize import visualize_assignments
         visualize_assignments(assignments)
 
     except SystemExit:
         pass
     except:
-        print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
+        print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')"""

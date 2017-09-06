@@ -19,6 +19,11 @@ units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
 peers = dict((s, set(sum(units[s],[])) - set([s])) for s in boxes)
 
 def assign_value(values, box, value):
+    """
+    Please use this function to update your values dictionary!
+    Assigns a value to a given box. If it updates the board record it.
+    """
+
     # Don't waste memory appending actions that don't actually change any values
     if values[box] == value:
         return values
@@ -51,6 +56,7 @@ def display(values):
     Args:
         values(dict): The sudoku in dictionary form
     """
+    
     width = 1+max(len(values[s]) for s in boxes)
     line = '+'.join(['-'*(width*3)]*3)
     for r in rows:
@@ -113,7 +119,7 @@ def only_choice(values):
     """
 
     This function will go through all the units, with a digit that only fits in one possible 
-    box, itt will assing that digit to that box.
+    box, it will assing that digit to that box.
 
     """
     for unit in unitlist:
@@ -129,20 +135,20 @@ def only_choice(values):
        As we enforce each constraint, we see how it introduces new constraints for other parts of the board that can 
        help us further reduce the number of possibilities.
 """
-def reduce_puzzle(values):
+def reduce_puzzle(values): # def reduce_puzzle(values, is_diagonal):
     stalled = False
     while not stalled:
         # Check how many boxes have a determined value 
         solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
         # Apply constraints 
         values = only_choice(naked_twins(eliminate(values)))
-        # Check how many boxes hae a determined value, to compare
+        # Check how many boxes have a determined value, to compare
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
         # If no new values were added, stop the loop
         stalled = solved_values_before == solved_values_after
         # Sanity check, return False if there is a box with zero available values
         if len([box for box in values.keys() if len(values[box]) == 0]):
-            return False
+            return False # This means probably that the sudoku is not a X Sudoku (diagonal)
     return values
 
 """

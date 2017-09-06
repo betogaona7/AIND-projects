@@ -1,5 +1,3 @@
-import collections
-
 assignments = []
 
 rows = 'ABCDEFGHI'
@@ -16,7 +14,7 @@ col_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
 
 diagonal_units = [[rows[i]+cols[i] for i in range(0,len(rows))]] + \
-                 [[rows[i]+cols[-i-1] for i in range(0, len(rows))]] 
+                 [[rows[i]+cols[-i-1] for i in range(0, len(rows))]]
 
 #diagonal_units = [['A1','B2', 'C3', 'D4', 'E5', 'F6', 'G7', 'H8', 'I9'],
 #                  ['A9','B8', 'C7', 'D6', 'E5', 'F4', 'G3', 'H2', 'I1']]
@@ -52,27 +50,17 @@ def naked_twins(values):
     """
 
     # Find all instances of naked twins
-    # Eliminate the naked twins as possibilities for their peers
-    """
-    naked_pairs = []
-    for unit in unitlist:
-        unfilled = [box for box in unit if len(values[box]) == 2] # Get all unfilled boxes that have 2 posibilities
+    for unit in unitlist: 
+        unfilled = [(values[box], box) for box in unit if len(values[box]) == 2]
+        # Eliminate the naked twins as possibilities for their peers
         if len(unfilled) == 2:
-            naked_pairs.append(unfilled) #Have almost 2 unfilled boxes
-        
-    for pair in naked_pairs:
-        if values[pair[0]] == values[pair[1]]:
-            #print("Naked pair true - ", pair, " values: ", values[pair[0]], " ", values[pair[1]])
-
-            for peer in peers[pair[0]]:
-                if peer != pair[1] and len(values[peer]) > 1:
-                    #print(values[peer])
-                    for digit in values[pair[0]]:
-                        assign_value(values, peer, values[peer].replace(digit,""))
-        #else:
-        #    print(pair) """
+            box1, box2 = unfilled[0], unfilled[1]
+            if box1[0] == box2[0]:
+                for box in unit:
+                    if len(values[box]) > 2:
+                        for digit in box1[0]:
+                            assign_value(values, box, values[box].replace(digit,""))
     return values
-
 
 
 
@@ -138,7 +126,7 @@ def reduce_puzzle(values):
             return False
     return values
 
-"""
+
 def search(values):
     values = reduce_puzzle(values)
     if not values:
@@ -162,13 +150,7 @@ def search(values):
         new_sudoku[boxselected] = digit
 
         if search(new_sudoku):
-            return search(new_sudoku)"""
-def search(values):
-    values = reduce_puzzle(values)
-    if values is False:
-        return False ## Failed earlier 
-    if all(len(values[s]) == 1 for s in boxes):
-        return values ## Solved!! 
+            return search(new_sudoku)
 
     # Choose one of the unfilled squares with the fewest possibilities 
     n, s = min((len(values[s]), s) for s in boxes if len(values[s]) > 1)
@@ -189,8 +171,7 @@ def solve(grid):
     Returns:
         The dictionary representation of the final sudoku grid. False if no solution exists.
     """
-    #values = search(grid_values(grid))
-    values = only_choice(eliminate(grid_values(grid)))
+    values = search(grid_values(grid))
     if not values:
         return False # No solutio
 
@@ -200,6 +181,11 @@ if __name__ == '__main__':
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
     display(solve(diag_sudoku_grid))
     
+    #print('\n')
+
+    #last_test = '4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......'
+    #solve(last_test)
+
 
     """try:
         from visualize import visualize_assignments

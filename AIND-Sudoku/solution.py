@@ -1,3 +1,4 @@
+import itertools
 assignments = []
 
 rows = 'ABCDEFGHI'
@@ -84,16 +85,18 @@ def naked_twins(values):
     for unit in unitlist: 
         # List of all values (and their boxes) containing only 2 possibilities (candidates to be naked pair)
         candidates = [(values[box], box) for box in unit if len(values[box]) == 2] 
-        # Get pairs
-        if len(candidates) == 2:
-            box1, box2 = candidates[0], candidates[1]
-            # Here we know if is a naked pair or not and then we eliminate it as possibilities for their peers 
-            if box1[0] == box2[0]: 
-                for box in unit:
-                    # Ensure that we don't modify boxes with values already assigned or modify our naked pair
-                    if len(values[box]) > 2: 
-                        for digit in box1[0]:
-                            assign_value(values, box, values[box].replace(digit,""))
+        if len(candidates) >= 2:
+            # Get pairs, if len(candidates > 2), then we need to make combinations to test each possible pair
+            pairs = [list(combination) for combination in itertools.combinations(candidates,2)]
+            for pair in pairs:
+                candidate1, candidate2 = pair[0], pair[1]
+                # Here we know if is a naked pair or not and then we eliminate it as possibilities for their peers 
+                if candidate1[0] == candidate2[0]: 
+                    for box in unit:
+                        # Ensure that we don't modify boxes with values already assigned or modify our naked pair
+                        if len(values[box]) >= 2 and candidate1[1] != box and candidate2[1] != box: 
+                            for digit in candidate1[0]:
+                                assign_value(values, box, values[box].replace(digit,""))
     return values
 
 """
@@ -141,7 +144,7 @@ def reduce_puzzle(values): # def reduce_puzzle(values, is_diagonal):
         # Check how many boxes have a determined value 
         solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
         # Apply constraints 
-        values = only_choice(naked_twins(eliminate(values)))
+        values = naked_twins(only_choice(eliminate(values)))
         # Check how many boxes have a determined value, to compare
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
         # If no new values were added, stop the loop
@@ -155,36 +158,60 @@ def reduce_puzzle(values): # def reduce_puzzle(values, is_diagonal):
     Search using Depth-First Search algorithm - without this strategy, we didn't solve hard tests. It seemed to reduce 
        every box to a number of possibilities, but it won't go further than that.
 """
-def search(values):
+def search(values): 
     # First reduce the puzzle using constraint propagation function
     values = reduce_puzzle(values)
-    if not values:
+    if values == False:
         return False
 
-    # Select one of the unfilled squares with the fewest posibilities 
-    unfilled = [box for box in boxes if len(values[box]) > 1]
+    if all(len(values[s]) == 1 for s in boxes):
+        return values ## That means Soduku was solved!
 
-    if len(unfilled) == 0: # That means Sudoku was solved!
-        return values
+    # Select one of the unfilled squares with the fewest posibilities
+    n,s = min((len(values[s]), s) for s in boxes if len(values[s]) > 1)
 
-    minimum = len(values[unfilled[0]])
-    boxselected = unfilled[0]
-
-    for box in unfilled:
-        if minimum > len(values[box]):
-            minimum = len(values[box])
-            boxselected = box
-
-    # Now use recursion to solve each one of the resulting Sudokus, and if one returns a value (not False) return that answer
-    for digit in values[boxselected]:
+    # Now use recursion to solve each one of the resulting Sudokus, and if one returns a value (not False) return that answer 
+    for value in values[s]:
         new_sudoku = values.copy()
-        new_sudoku[boxselected] = digit
+        new_sudoku[s] = value
+        attempt = search(new_sudoku)
+        if attempt:
+            return attempt
 
-        if search(new_sudoku):
-            return search(new_sudoku)
+def solve(grid):
+    """
+    Find the solution to a Sudoku grid.
+    Args:
+        grid(string): a string representing a sudoku grid.
+            Example: '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
+    Returns:
+        The dictionary representation of the final sudoku grid. False if no solution exists.
+    """
+    values = search(grid_values(grid))
+    if not values:
+        return False # No solution
+
+    return values
+
+if __name__ == '__main__':
+    diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
+    display(solve(diag_sudoku_grid))
+
+    try:
+        from visualize import visualize_assignments
+        visualize_assignments(assignments)
+
+    except SystemExit:
+        pass
+    except:
+        print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
 
 
-def three_line(values):
+
+
+
+
+"""def three_line(values):
     for digit in '123456789':
         print("searching digit: ", digit)
         cont = 0
@@ -207,51 +234,4 @@ def three_line(values):
                 
             print('\n')
         print('\n')
-
-
-    return values
-
-
-
-def solve(grid):
-    """
-    Find the solution to a Sudoku grid.
-    Args:
-        grid(string): a string representing a sudoku grid.
-            Example: '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
-    Returns:
-        The dictionary representation of the final sudoku grid. False if no solution exists.
-    """
-    values = search(grid_values(grid))
-    if not values:
-        return False # No solution
-
-    return values
-
-if __name__ == '__main__':
-    diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
-    display(solve(diag_sudoku_grid))
-    
-    values = {'I6': '4', 'H9': '3', 'I2': '6', 'E8': '1', 'H3': '5', 'H7': '8', 'I7': '1', 'I4': '8',
-               'H5': '6', 'F9': '7', 'G7': '6', 'G6': '3', 'G5': '2', 'E1': '8', 'G3': '1', 'G2': '8',
-               'G1': '7', 'I1': '23', 'C8': '5', 'I3': '23', 'E5': '347', 'I5': '5', 'C9': '1', 'G9': '5',
-               'G8': '4', 'A1': '1', 'A3': '4', 'A2': '237', 'A5': '9', 'A4': '2357', 'A7': '27',
-               'A6': '257', 'C3': '8', 'C2': '237', 'C1': '23', 'E6': '579', 'C7': '9', 'C6': '6',
-               'C5': '37', 'C4': '4', 'I9': '9', 'D8': '8', 'I8': '7', 'E4': '6', 'D9': '6', 'H8': '2',
-               'F6': '125', 'A9': '8', 'G4': '9', 'A8': '6', 'E7': '345', 'E3': '379', 'F1': '6',
-               'F2': '4', 'F3': '23', 'F4': '1235', 'F5': '8', 'E2': '37', 'F7': '35', 'F8': '9',
-               'D2': '1', 'H1': '4', 'H6': '17', 'H2': '9', 'H4': '17', 'D3': '2379', 'B4': '27',
-               'B5': '1', 'B6': '8', 'B7': '27', 'E9': '2', 'B1': '9', 'B2': '5', 'B3': '6', 'D6': '279',
-               'D7': '34', 'D4': '237', 'D5': '347', 'B8': '3', 'B9': '4', 'D1': '5'}
-    """display(naked_twins(values))"""
-    three_test = '....34....31....9.5..9.6..86....948...........743....99..4.8..2.6....81....17....'
-    display(three_line(grid_values(three_test)))
-    """
-    try:
-        from visualize import visualize_assignments
-        visualize_assignments(assignments)
-
-    except SystemExit:
-        pass
-    except:
-        print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')"""
+    return values"""

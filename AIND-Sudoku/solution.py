@@ -183,6 +183,36 @@ def search(values):
         if search(new_sudoku):
             return search(new_sudoku)
 
+
+def three_line(values):
+    for digit in '123456789':
+        print("searching digit: ", digit)
+        cont = 0
+        for i in range(0,3):
+            ocurrences = 0
+            for j in range(0,3):
+                #print("set: ", i, " row: ",j, " boxes: ", row_units[cont])
+                
+                # Here we scan 3 rows 
+                #vals = [values[box] for box in row_units[cont] ]
+                for box in row_units[cont]:
+                    if digit == values[box]:
+                        ocurrences += 1
+                        print(box)
+
+                cont += 1
+            if ocurrences == 3:
+                break # The digit is "solved"
+                #
+                
+            print('\n')
+        print('\n')
+
+
+    return values
+
+
+
 def solve(grid):
     """
     Find the solution to a Sudoku grid.
@@ -202,7 +232,7 @@ if __name__ == '__main__':
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
     display(solve(diag_sudoku_grid))
     
-    """values = {'I6': '4', 'H9': '3', 'I2': '6', 'E8': '1', 'H3': '5', 'H7': '8', 'I7': '1', 'I4': '8',
+    values = {'I6': '4', 'H9': '3', 'I2': '6', 'E8': '1', 'H3': '5', 'H7': '8', 'I7': '1', 'I4': '8',
                'H5': '6', 'F9': '7', 'G7': '6', 'G6': '3', 'G5': '2', 'E1': '8', 'G3': '1', 'G2': '8',
                'G1': '7', 'I1': '23', 'C8': '5', 'I3': '23', 'E5': '347', 'I5': '5', 'C9': '1', 'G9': '5',
                'G8': '4', 'A1': '1', 'A3': '4', 'A2': '237', 'A5': '9', 'A4': '2357', 'A7': '27',
@@ -213,9 +243,10 @@ if __name__ == '__main__':
                'D2': '1', 'H1': '4', 'H6': '17', 'H2': '9', 'H4': '17', 'D3': '2379', 'B4': '27',
                'B5': '1', 'B6': '8', 'B7': '27', 'E9': '2', 'B1': '9', 'B2': '5', 'B3': '6', 'D6': '279',
                'D7': '34', 'D4': '237', 'D5': '347', 'B8': '3', 'B9': '4', 'D1': '5'}
-    display(naked_twins(values))"""
-
-
+    """display(naked_twins(values))"""
+    three_test = '....34....31....9.5..9.6..86....948...........743....99..4.8..2.6....81....17....'
+    display(three_line(grid_values(three_test)))
+    """
     try:
         from visualize import visualize_assignments
         visualize_assignments(assignments)
@@ -223,4 +254,4 @@ if __name__ == '__main__':
     except SystemExit:
         pass
     except:
-        print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
+        print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')"""

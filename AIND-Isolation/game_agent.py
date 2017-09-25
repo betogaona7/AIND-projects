@@ -213,24 +213,27 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
-        is_terminal_state = not bool(game.get_legal_moves())
+        legal_moves = game.get_legal_moves()
+        if not legal_moves:
+            return -1 #here we need send (-1, -1)
 
-        if depth == 0 or is_terminal_state:
-            return -1
+        if depth == 0:
+            return self.score(game, self)
 
         if maximizingPlayer:
-            best_move = float("-inf")
+            best_value = float("-inf")
             for move in game.get_legal_moves():
                 v = self.minimax(game.forecast_move(move), depth-1, False)
-                best_move = max(best_move, v)
-            return best_move
+                best_value = max(best_value, v)
+            return best_value
 
         else:
-            best_move = float("inf")
+            best_value = float("inf")
             for move in game.get_legal_moves():
                 v = self.minimax(game.forecast_move(move), depth-1, True)
-                best_move = min(best_move, v)
-            return best_move
+                best_value = min(best_value, v)
+            return best_value
+       
 
 
 

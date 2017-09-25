@@ -170,7 +170,7 @@ class MinimaxPlayer(IsolationPlayer):
         # Return the best move from the last completed search iteration
         return best_move
 
-    def minimax(self, game, depth, maximizingPlayer=True):
+    def minimax(self, game, depth):
         """Implement depth-limited minimax search algorithm as described in
         the lectures.
 
@@ -213,24 +213,31 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
+        return max(game.get_legal_moves(), key=lambda m: self.minimax_decision(game.forecast_move(m), depth, maximizingPlayer=False))
+
+    def minimax_decision(self, game, depth, maximizingPlayer=True):
+
+        if self.time_left() < self.TIMER_THRESHOLD:
+            raise SearchTimeout()
+
+        # TODO: finish this function!
         is_terminal_state = not bool(game.get_legal_moves())
 
-        if depth == 0 or is_terminal_state:
-            return -1
+        if depth == 0 and is_terminal_state:
+            return (-1,-1)
 
         if maximizingPlayer:
-            best_move = float("-inf")
+            v = float("-inf")
             for move in game.get_legal_moves():
-                v = self.minimax(game.forecast_move(move), depth-1, False)
-                best_move = max(best_move, v)
-            return best_move
+                v = max(v, self.minimax_decision(game.forecast_move(move), depth-1, False))
+            return v
 
         else:
-            best_move = float("inf")
+            v = float("inf")
             for move in game.get_legal_moves():
-                v = self.minimax(game.forecast_move(move), depth-1, True)
-                best_move = min(best_move, v)
-            return best_move
+                v = min(v, self.minimax_decision(game.forecast_move(move), depth-1, True))
+            return v
+       
 
 
 

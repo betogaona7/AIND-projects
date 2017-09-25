@@ -170,7 +170,7 @@ class MinimaxPlayer(IsolationPlayer):
         # Return the best move from the last completed search iteration
         return best_move
 
-    def minimax(self, game, depth):
+    def minimax(self, game, depth, cutoff_test=None, eval_fn=None):
         """Implement depth-limited minimax search algorithm as described in
         the lectures.
 
@@ -213,30 +213,42 @@ class MinimaxPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
-        return max(game.get_legal_moves(), key=lambda m: self.minimax_decision(game.forecast_move(m), depth, maximizingPlayer=False))
+        def max_value(self, game, depth):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
 
-    def minimax_decision(self, game, depth, maximizingPlayer=True):
+            if cutoff_test(game, depth):
+                return eval_fn()
 
-        if self.time_left() < self.TIMER_THRESHOLD:
-            raise SearchTimeout()
-
-        # TODO: finish this function!
-        is_terminal_state = not bool(game.get_legal_moves())
-
-        if depth == 0 and is_terminal_state:
-            return (-1,-1)
-
-        if maximizingPlayer:
             v = float("-inf")
-            for move in game.get_legal_moves():
-                v = max(v, self.minimax_decision(game.forecast_move(move), depth-1, False))
+            for m in game.get_legal_moves(game):
+                v = max(v, self.min_value(game, depth+1))
             return v
 
-        else:
+        def min_value(self, game, depth):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+
+            if cutoff_test(game, depth):
+                return eval_fn()
+
             v = float("inf")
-            for move in game.get_legal_moves():
-                v = min(v, self.minimax_decision(game.forecast_move(move), depth-1, True))
+            for m in game.get_legal_moves(game):
+                v = min(v, self.max_value(game, depth+1))
             return v
+
+        def terminal_test(self, game):
+            return not bool(game.get_legal_moves())
+
+        cutoff_test = (cutoff_test or (lambda state, d: d > depth or not game.get_legal_moves())
+        #
+        _, move = max(game.get_legal_moves(game), key=lambda m: min_value(game.forecast_move(m), 0))
+
+
+        _, move = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
+        #return state
+
+
        
 
 

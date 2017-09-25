@@ -240,11 +240,11 @@ class MinimaxPlayer(IsolationPlayer):
         def terminal_test(self, game):
             return not bool(game.get_legal_moves())
 
-        cutoff_test = (cutoff_test or (lambda state, d: d > depth or not game.get_legal_moves())
+        cutoff_test = (cutoff_test or (lambda state, d: d > depth or self.terminal_test(game)))
         #
         _, move = max(game.get_legal_moves(game), key=lambda m: min_value(game.forecast_move(m), 0))
 
-
+        
         _, move = max([(self.score(game.forecast_move(m), self), m) for m in legal_moves])
         #return state
 

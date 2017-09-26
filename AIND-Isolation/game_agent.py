@@ -305,7 +305,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         # TODO: finish this function!
         raise NotImplementedError
 
-    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf")):
+    def alphabeta(self, game, d, alpha=float("-inf"), beta=float("inf"), cutoff_test=None, eval_fn=None):
         """Implement depth-limited minimax search with alpha-beta pruning as
         described in the lectures.
 
@@ -354,4 +354,54 @@ class AlphaBetaPlayer(IsolationPlayer):
             raise SearchTimeout()
 
         # TODO: finish this function!
-        raise NotImplementedError
+        def terminal_test(game):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+            return not bool(game.get_legal_moves())
+
+        def max_value(game, alpha, beta, depth):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+
+            if cutoff_test(game, depth):
+                return eval_fn(game)
+
+            v = float("-inf")
+            for m in game.get_legal_moves():
+                v = max(v, min_value(game.forecast_move(m), alpha, beta, depth+1))
+                if v >= beta:
+                    return v
+                alpha = max(alpha, v)
+            return v
+
+        def min_value(game, alpha, beta, depth):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+
+            if cutoff_test(game, depth):
+                return eval_fn(game)
+
+            v = float("inf")
+            for m in game.get_legal_moves():
+                v = min(v, max_value(game.forecast_move(m), alpha, beta, depth+1))
+                if v <= alpha:
+                    return v
+                beta = min(beta, v)
+            return v
+
+        cutoff_test = (cutoff_test or (lambda state, depth: depth > d or terminal_test(game)))
+        eval_fn = eval_fn or (lambda game: self.score(game, self))
+        
+
+        best_score = float("-inf")
+        best_action = None
+
+        for move in game.get_legal_moves():
+            v = min_value(game.forecast_move(move), best_score, beta, 0)
+            if v > best_score:
+                best_score = v
+                best_action = move
+        return best_action
+
+
+        #return max(game.get_legal_moves(), key=lambda m: min_value(game, alpha, beta, -1))

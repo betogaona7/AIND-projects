@@ -212,8 +212,35 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
+        def terminal_test(game):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+            return not bool(game.get_legal_moves())
+
+        def min_value(game, depth):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+            if terminal_test(game) or depth == 0: 
+                return self.score(game, self)
+            v = float("inf")
+            for m in game.get_legal_moves():
+                v = min(v, max_value(game.forecast_move(m), depth-1))
+            return v
+
+        def max_value(game, depth):
+            if self.time_left() < self.TIMER_THRESHOLD:
+                raise SearchTimeout()
+            if terminal_test(game) or depth == 0:
+                return self.score(game, self)
+            v = float("-inf")
+            for m in game.get_legal_moves():
+                v = max(v, min_value(game.forecast_move(m), depth-1))
+            return v
+
+        return max(game.get_legal_moves(), key=lambda m: min_value(game.forecast_move(m), depth-1))
+
         # TODO: finish this function!
-        legal_moves = game.get_legal_moves()
+        """legal_moves = game.get_legal_moves()
         if not legal_moves:
             return -1 #here we need send (-1, -1)
 
@@ -232,7 +259,7 @@ class MinimaxPlayer(IsolationPlayer):
             for move in game.get_legal_moves():
                 v = self.minimax(game.forecast_move(move), depth-1, True)
                 best_value = min(best_value, v)
-            return best_value
+            return best_value"""
        
 
 

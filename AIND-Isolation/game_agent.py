@@ -35,6 +35,8 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
     # TODO: finish this function!
+    #print("Current location:" , game.get_player_location(player), " Oponent location: ", game.get_player_location(game.get_opponent(player)))
+
     if game.is_loser(player):
         return float("-inf")
 
@@ -58,19 +60,14 @@ def custom_score(game, player):
 
     """
 
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    own_moves = len(game.get_legal_moves(player))+1
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))+1
     free_moves = len(game.get_blank_spaces())
-    #blank_spaces = game.get_blank_spaces()
-
-    #own_location_x, own_location_y = game.get_player_location(player)
-    #opp_location_x, opp_location_y = game.get_player_location(game.get_opponent(player))
-
-
-
 
     #return float(((free_moves - own_moves)+(free_moves - opp_moves))/2.)
-    return 0.
+    #return float((free_moves-own_moves)-(free_moves-opp_moves))*2.
+    return float(own_moves - (2*opp_moves))
+    #return 0.
 
 
 def custom_score_2(game, player):
@@ -104,10 +101,32 @@ def custom_score_2(game, player):
 
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    free_moves = len(game.get_blank_spaces())
 
-    #return float((free_moves-(own_moves-opp_moves))/2.)
-    return 0.
+    #return float((free_moves/own_moves)+(free_moves/opp_moves))/2.
+    
+    # Number of squares remaining doesn't refledct the goodness of the board
+    
+    # Number of squares remainig minus number of my moves would penalize our computer palyer with more 
+    # potential moves, which is counter productive 
+
+    # Number of my moves minus number of opponent moves. It continues to take into account boards
+    # where the current player can make a larger number of moves and also penalizes boards where the 
+    # opponent can make a large number of moves
+    # Causes the computer player to seek moves with the most options while trying to get in the way of the 
+    # opponent's moves
+
+    # We can even weigth the component of the formuula to try to encourage more aggessive or less agressive
+    # game play
+
+    # Number of my moves minus 2 times the number of opponents moves will cause our computer player to chase 
+    # after the opponent
+
+    #return float(own_moves) #It would label boards as good where we has a large number of moves 
+    #return float(opp_moves - own_moves)
+    y1, x1 = game.get_player_location(player)
+    y2, x2 = game.get_player_location(game.get_opponent(player))
+    #return float((y2-y1) + (x2-x1))
+    return float((y2-y1) + (x2-x1) + (opp_moves- own_moves)) - 8
 
 
 def custom_score_3(game, player):
@@ -143,8 +162,10 @@ def custom_score_3(game, player):
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))+1
     free_moves = len(game.get_blank_spaces())+1
 
-    #return float((free_moves/own_moves)+(free_moves/opp_moves))
-    return 0.
+
+    return float((free_moves/own_moves)+(free_moves/opp_moves))
+    #return float(opp_moves - (2*own_moves))
+    #return 0.
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never

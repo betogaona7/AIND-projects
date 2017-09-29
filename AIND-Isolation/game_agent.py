@@ -12,14 +12,8 @@ class SearchTimeout(Exception):
 
 def custom_score(game, player):
     """
-    The basic evaluation function, number of my moves plus one minus two times number of 
-    opponent moves plus one. The computer player seek moves with the most options while 
+    The basic evaluation function, computer player seek moves with the most options while 
     trying to get in the way of the opponent's moves.
-
-    Putting weigth in "opponent's moves" causes the agent be more aggresive, also if we 
-    add a sum on the number of moves we will get a better result compared to having the 
-    exact number of moves, i.e.  with a sum of 1 we get a win rate approximate of 70% while 
-    without the sum we get a win rate approximate of 60% 
 
     Parameters
     ----------
@@ -48,13 +42,10 @@ def custom_score(game, player):
     
     return own_moves-(2.*opp_moves)
 
-
 def custom_score_2(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
-
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
+    """
+    The lucky evaluation function, is another version of the basic evaluation function that 
+    takes into account the number of locations that are still available on the board.
 
     Parameters
     ----------
@@ -71,7 +62,7 @@ def custom_score_2(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
+
     if game.is_loser(player):
         return float("-inf")
 
@@ -80,66 +71,13 @@ def custom_score_2(game, player):
 
     own_moves = len(game.get_legal_moves(player))+1
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))+1
+    free_moves = len(game.get_blank_spaces())+1
 
-    #return float((free_moves/own_moves)+(free_moves/opp_moves))/2.
-
-    # Include something about the current state of the game.
-    # Think about different things you might look at about the state of the game, and 
-    # different ways to blend them together 
-
-    # The number of open spaces plus the number of moves you have made so far.
-    # ( 2*number of open spaces) plus the number of moves you havve made so far
-
-    """
-    Well, actually, both the number of open spaces and the number of moves you've made so 
-    far are the same for every position for the same depth. So, any heuristic that relies 
-    only on these two is exactly as effective (minus very slight performance penalty) as a 
-    zero score function. But there could be heuristics that, for example, use the number of 
-    moves in order to determine how far into the game we are, and to change the relative 
-    weights of some other factors in the calculation of the score function accordingly.
-
-    """
-    
-    # Number of squares remaining doesn't refledct the goodness of the board
-    
-    # Number of squares remainig minus number of my moves would penalize our computer palyer with more 
-    # potential moves, which is counter productive 
-
-    # Number of my moves minus number of opponent moves. It continues to take into account boards
-    # where the current player can make a larger number of moves and also penalizes boards where the 
-    # opponent can make a large number of moves
-    # Causes the computer player to seek moves with the most options while trying to get in the way of the 
-    # opponent's moves
-
-    # We can even weigth the component of the formuula to try to encourage more aggessive or less agressive
-    # game play
-
-    # Number of my moves minus 2 times the number of opponents moves will cause our computer player to chase 
-    # after the opponent
-
-    #return float(own_moves) #It would label boards as good where we has a large number of moves 
-    #return float(opp_moves - own_moves)
-    #y1, x1 = game.get_player_location(player)
-    #y2, x2 = game.get_player_location(game.get_opponent(player))
-    #return float((y2-y1) + (x2-x1))
-    #return float((y2-y1) + (x2-x1) + (opp_moves- own_moves)) - 8
-
-    #return float((free_moves/own_moves)+(free_moves/opp_moves))**2.
-    return float(own_moves - (3*opp_moves))
-
+    return (free_moves/own_moves)+(free_moves/opp_moves)**2.
 
 def custom_score_3(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
-
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
+    """
+    The coward evaluation function, get as far away from the opponent as possible.
 
     player : object
         A player instance in the current game (i.e., an object corresponding to
@@ -150,20 +88,20 @@ def custom_score_3(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
+
     if game.is_loser(player):
         return float("-inf")
 
     if game.is_winner(player):
         return float("inf")
 
-    own_moves = len(game.get_legal_moves(player))+2
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))+2
-    
-    return float(own_moves - (2*opp_moves))
-    #return float((free_moves/own_moves)+2*(free_moves/opp_moves))
-    #return float(opp_moves - (2*own_moves))
-    #return 0.
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    y1, x1 = game.get_player_location(player)
+    y2, x2 = game.get_player_location(game.get_opponent(player))
+
+    return (y2-y1) + (x2-x1) + (opp_moves- own_moves) - 8.
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never
@@ -287,7 +225,6 @@ class MinimaxPlayer(IsolationPlayer):
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
 
-        # TODO: finish this function!
         def terminal_test(game):
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()
@@ -322,8 +259,6 @@ class MinimaxPlayer(IsolationPlayer):
                 max_v = min_v
                 best_move = m
         return best_move
-        #return max(game.get_legal_moves(), key=lambda m: min_value(game.forecast_move(m), depth-1))
-       
 
 class AlphaBetaPlayer(IsolationPlayer):
     """Game-playing agent that chooses a move using iterative deepening minimax
@@ -362,11 +297,9 @@ class AlphaBetaPlayer(IsolationPlayer):
             (-1, -1) if there are no available legal moves.
         """
         self.time_left = time_left
-        # TODO: finish this function!
 
         # Initialize the best move so that this function returns something
         # in case the search fails due to timeout
-
         best_move = (-1, -1)
 
         try:
@@ -427,8 +360,7 @@ class AlphaBetaPlayer(IsolationPlayer):
         """
         if self.time_left() < self.TIMER_THRESHOLD:
             raise SearchTimeout()
-
-        # TODO: finish this function!
+            
         def terminal_test(game):
             if self.time_left() < self.TIMER_THRESHOLD:
                 raise SearchTimeout()

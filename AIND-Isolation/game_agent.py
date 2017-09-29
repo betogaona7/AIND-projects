@@ -11,13 +11,15 @@ class SearchTimeout(Exception):
 
 
 def custom_score(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
+    """
+    The basic evaluation function, number of my moves plus one minus two times number of 
+    opponent moves plus one. The computer player seek moves with the most options while 
+    trying to get in the way of the opponent's moves.
 
-    This should be the best heuristic function for your project submission.
-
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
+    Putting weigth in "opponent's moves" causes the agent be more aggresive, also if we 
+    add a sum on the number of moves we will get a better result compared to having the 
+    exact number of moves, i.e.  with a sum of 1 we get a win rate approximate of 70% while 
+    without the sum we get a win rate approximate of 60% 
 
     Parameters
     ----------
@@ -34,8 +36,6 @@ def custom_score(game, player):
     float
         The heuristic value of the current game state to the specified player.
     """
-    # TODO: finish this function!
-    #print("Current location:" , game.get_player_location(player), " Oponent location: ", game.get_player_location(game.get_opponent(player)))
 
     if game.is_loser(player):
         return float("-inf")
@@ -43,31 +43,10 @@ def custom_score(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    # Include something about the current state of the game.
-    # Think about different things you might look at about the state of the game, and 
-    # different ways to blend them together 
-
-    # The number of open spaces plus the number of moves you have made so far.
-    # ( 2*number of open spaces) plus the number of moves you havve made so far
-
-    """
-    Well, actually, both the number of open spaces and the number of moves you've made so 
-    far are the same for every position for the same depth. So, any heuristic that relies 
-    only on these two is exactly as effective (minus very slight performance penalty) as a 
-    zero score function. But there could be heuristics that, for example, use the number of 
-    moves in order to determine how far into the game we are, and to change the relative 
-    weights of some other factors in the calculation of the score function accordingly.
-
-    """
-
     own_moves = len(game.get_legal_moves(player))+1
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))+1
-    free_moves = len(game.get_blank_spaces())
-
-    #return float(((free_moves - own_moves)+(free_moves - opp_moves))/2.)
-    #return float((free_moves-own_moves)-(free_moves-opp_moves))*2.
-    return float(own_moves - (2*opp_moves))
-    #return 0.
+    
+    return own_moves-(2.*opp_moves)
 
 
 def custom_score_2(game, player):
@@ -99,10 +78,27 @@ def custom_score_2(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    own_moves = len(game.get_legal_moves(player))+1
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))+1
 
     #return float((free_moves/own_moves)+(free_moves/opp_moves))/2.
+
+    # Include something about the current state of the game.
+    # Think about different things you might look at about the state of the game, and 
+    # different ways to blend them together 
+
+    # The number of open spaces plus the number of moves you have made so far.
+    # ( 2*number of open spaces) plus the number of moves you havve made so far
+
+    """
+    Well, actually, both the number of open spaces and the number of moves you've made so 
+    far are the same for every position for the same depth. So, any heuristic that relies 
+    only on these two is exactly as effective (minus very slight performance penalty) as a 
+    zero score function. But there could be heuristics that, for example, use the number of 
+    moves in order to determine how far into the game we are, and to change the relative 
+    weights of some other factors in the calculation of the score function accordingly.
+
+    """
     
     # Number of squares remaining doesn't refledct the goodness of the board
     
@@ -123,10 +119,13 @@ def custom_score_2(game, player):
 
     #return float(own_moves) #It would label boards as good where we has a large number of moves 
     #return float(opp_moves - own_moves)
-    y1, x1 = game.get_player_location(player)
-    y2, x2 = game.get_player_location(game.get_opponent(player))
+    #y1, x1 = game.get_player_location(player)
+    #y2, x2 = game.get_player_location(game.get_opponent(player))
     #return float((y2-y1) + (x2-x1))
-    return float((y2-y1) + (x2-x1) + (opp_moves- own_moves)) - 8
+    #return float((y2-y1) + (x2-x1) + (opp_moves- own_moves)) - 8
+
+    #return float((free_moves/own_moves)+(free_moves/opp_moves))**2.
+    return float(own_moves - (3*opp_moves))
 
 
 def custom_score_3(game, player):
@@ -158,12 +157,11 @@ def custom_score_3(game, player):
     if game.is_winner(player):
         return float("inf")
 
-    own_moves = len(game.get_legal_moves(player))+1
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))+1
-    free_moves = len(game.get_blank_spaces())+1
-
-
-    return float((free_moves/own_moves)+(free_moves/opp_moves))
+    own_moves = len(game.get_legal_moves(player))+2
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))+2
+    
+    return float(own_moves - (2*opp_moves))
+    #return float((free_moves/own_moves)+2*(free_moves/opp_moves))
     #return float(opp_moves - (2*own_moves))
     #return 0.
 

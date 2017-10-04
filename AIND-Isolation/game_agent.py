@@ -101,7 +101,7 @@ def custom_score_3(game, player):
     y1, x1 = game.get_player_location(player)
     y2, x2 = game.get_player_location(game.get_opponent(player))
 
-    return float((y2-y1) + (x2-x1) + (opp_moves- own_moves)) #- 8.
+    return float((y2-y1) + (x2-x1) + (opp_moves- own_moves)) 
 
 class IsolationPlayer:
     """Base class for minimax and alphabeta agents -- this class is never

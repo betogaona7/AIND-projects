@@ -358,7 +358,7 @@ class PlanningGraph():
                 action_node.children.add(node)
                 # Make the preceding level¿s parents of the node
                 node.parents.add(action_node)
-                
+
         # add state nodes to the ccurrent level
         self.s_levels.append(state_nodes)
 
@@ -419,6 +419,16 @@ class PlanningGraph():
         :return: bool
         """
         # TODO test for Inconsistent Effects between nodes
+        
+        # Check inconsistent effects for node_a1
+        for effect in node_a1.action.effect_add:
+            if effect in node_a2.action.effect_rem:
+                return True
+        # Check incosistent effects for node_a2
+        for effect in node_a2.action.effect_add:
+            if effect in node_a1.action.effect_rem:
+                return True
+
         return False
 
     def interference_mutex(self, node_a1: PgNode_a, node_a2: PgNode_a) -> bool:

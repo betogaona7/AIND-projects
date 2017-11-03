@@ -261,7 +261,7 @@ def air_cargo_p2() -> AirCargoProblem:
            expr('At(P2, JFK)'),
            expr('At(P3, ATL)'),
            ]
-    # list all atoms in the complement of post list
+    # list all atoms in the complement of pos list
     neg = [expr('At(P1, JFK)'),
            expr('At(P1, ATL)'),
            expr('At(P2, SFO)'),

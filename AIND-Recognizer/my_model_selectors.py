@@ -60,7 +60,9 @@ class SelectorConstant(ModelSelector):
         best_num_components = self.n_constant
         return self.base_model(best_num_components)
 
-
+# Log Likelihood using Cross-Validation (CV)
+# Bayesian Information Criterion (BIC)
+# Discriminative Information Criterion (DIC)
 class SelectorBIC(ModelSelector):
     """ select the model with the lowest Bayesian Information Criterion(BIC) score
 
@@ -75,10 +77,28 @@ class SelectorBIC(ModelSelector):
         :return: GaussianHMM object
         """
         warnings.filterwarnings("ignore", category=DeprecationWarning)
+        
+        BIC_score = float("inf")
+        best_num_components = self.min_n_components
+        
+        for components in range(self.min_n_components, self.max_n_components + 1):
+            try:
+                model = GaussianHMM(n_components=components, n_iter=1000).fit(self.X, self.lengths)
 
-        # TODO implement model selection based on BIC scores
-        raise NotImplementedError
+                n_features = self.X.shape[1]
+                logL = model.score(self.X, self.lengths)
+                p = ((components**2.) + (2. * components * (n_features - 1)))
+                logN = np.log(len(self.lengths))
 
+                BIC = -2 * logL + p * logN
+
+                if BIC < BIC_score:
+                    best_num_components = components
+                    BIC_score = BIC
+            except:
+                pass
+                
+        return self.base_model(best_num_components)
 
 class SelectorDIC(ModelSelector):
     ''' select best model based on Discriminative Information Criterion
@@ -106,4 +126,5 @@ class SelectorCV(ModelSelector):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
 
         # TODO implement model selection using CV
+        
         raise NotImplementedError

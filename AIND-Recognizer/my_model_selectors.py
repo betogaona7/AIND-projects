@@ -77,7 +77,7 @@ class SelectorBIC(ModelSelector):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         
         BIC_score = float("inf")
-        best_num_components = self.min_n_components
+        best_num_components = self.n_constant
         
         for components in range(self.min_n_components, self.max_n_components + 1):
             try:
@@ -117,7 +117,7 @@ class SelectorDIC(ModelSelector):
         # M = Total quantify words
       
         DIC_score = float("-inf")
-        best_num_components = self.min_n_components
+        best_num_components = self.n_constant
         
         for components in range(self.min_n_components, self.max_n_components + 1):
             try:
@@ -150,7 +150,7 @@ class SelectorCV(ModelSelector):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         
         CV_score = float("-inf")
-        best_num_components = self.min_n_components
+        best_num_components = self.n_constant
         
         for components in range(self.min_n_components, self.max_n_components + 1):
             if len(self.sequences) <= 1:

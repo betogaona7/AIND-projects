@@ -60,9 +60,7 @@ class SelectorConstant(ModelSelector):
         best_num_components = self.n_constant
         return self.base_model(best_num_components)
 
-# Log Likelihood using Cross-Validation (CV)
-# Bayesian Information Criterion (BIC)
-# Discriminative Information Criterion (DIC)
+
 class SelectorBIC(ModelSelector):
     """ select the model with the lowest Bayesian Information Criterion(BIC) score
 
@@ -119,7 +117,7 @@ class SelectorDIC(ModelSelector):
         # M = Total quantify words
       
         DIC_score = float("-inf")
-        best_model = None
+        best_num_components = self.min_n_components
         
         for components in range(self.min_n_components, self.max_n_components + 1):
             try:
@@ -135,14 +133,14 @@ class SelectorDIC(ModelSelector):
                 DIC = logL - 1/(M-1) * antilogL
                 
                 if DIC > DIC_score:
-                    best_model = model
+                    best_num_components = components
                     DIC_score = DIC
             except:
                 pass
             
-        return best_model
+        return self.base_model(best_num_components)
 
-
+    
 class SelectorCV(ModelSelector):
     ''' select best model based on average log Likelihood of cross-validation folds
 
@@ -150,7 +148,28 @@ class SelectorCV(ModelSelector):
 
     def select(self):
         warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-        # TODO implement model selection using CV
         
-        raise NotImplementedError
+        CV_score = float("-inf")
+        best_num_components = self.min_n_components
+        
+        for components in range(self.min_n_components, self.max_n_components + 1):
+            if len(self.sequences) <= 1:
+                continue
+            try:
+                split_method = KFold()    
+                logL_scores = []
+                for cv_train_idx, cv_test_idx in split_method.split(self.sequences):
+                    
+                    X_train, lengths_train = combine_sequences(cv_train_idx, self.sequences)
+                    X_test, lengths_test = combine_sequences(cv_test_idx, self.sequences)
+                    
+                    model = GaussianHMM(n_components=components, n_iter=1000).fit(X_train, lengths_train)
+                    logL_scores.append(model.score(X_test, lengths_test))
+                    
+                if np.mean(logL_scores) > CV_score:
+                    best_num_components = components
+                    CV_score = np.mean(logL_scores)
+            except:
+                pass 
+        
+        return self.base_model(best_num_components)
